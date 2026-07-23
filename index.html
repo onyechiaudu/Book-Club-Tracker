@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloom & Bind — Book Club Tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+:root {
+  --bg:#faf8f5;--bg-secondary:#f5f0eb;--bg-tertiary:#efe9e2;--text-primary:#2d2420;--text-secondary:#7a6b62;--text-tertiary:#a8988e;
+  --border:#e8ddd4;--border-light:#f0e6dd;--accent:#c4785a;--accent-light:#f5e6df;--accent-soft:#fdf6f2;
+  --rose:#c97b7b;--rose-light:#f9ecec;--sage:#8fa68e;--sage-light:#eaf0ea;--lavender:#a89bb8;--lavender-light:#f0ecf5;
+  --cream:#fffdf9;--danger:#c45a5a;--danger-light:#f9e8e8;--positive:#6b9e6b;--positive-light:#e8f0e8;--warning:#c9a05c;--warning-light:#f5efe0;
+  --radius-sm:8px;--radius-md:14px;--radius-lg:20px;--radius-xl:28px;
+  --shadow:0 2px 12px rgba(45,36,32,0.06);--shadow-lg:0 8px 32px rgba(45,36,32,0.1);
+  --font-serif:'Playfair Display',Georgia,serif;--font-sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1a1614;--bg-secondary:#25201c;--bg-tertiary:#2e2824;--text-primary:#f0eae4;--text-secondary:#b8a99e;--text-tertiary:#8a7b70;
+    --border:#3a322c;--border-light:#2e2824;--accent:#d4917a;--accent-light:rgba(196,120,90,0.15);--accent-soft:rgba(196,120,90,0.08);
+    --rose:#d49191;--rose-light:rgba(201,123,123,0.15);--sage:#9ab89a;--sage-light:rgba(143,166,142,0.15);--lavender:#b8a8c8;--lavender-light:rgba(168,155,184,0.15);
+    --cream:#25201c;--danger:#d47070;--danger-light:rgba(196,90,90,0.15);--positive:#7ab87a;--positive-light:rgba(107,158,107,0.15);--warning:#d4b070;--warning-light:rgba(201,160,92,0.15);
+    --shadow:0 2px 12px rgba(0,0,0,0.2);--shadow-lg:0 8px 32px rgba(0,0,0,0.3);
+  }
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--text-primary);font-family:var(--font-sans);line-height:1.6}
+.container{max-width:840px;margin:0 auto;padding:20px}
+h1{font-family:var(--font-serif);font-size:36px;font-weight:700;margin:0;letter-spacing:-0.02em}
+h2{font-family:var(--font-serif);font-size:26px;font-weight:700;margin:0;letter-spacing:-0.01em}
+h3{font-family:var(--font-serif);font-size:20px;font-weight:600;margin:0}
+p{margin:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 24px;border:none;border-radius:var(--radius-md);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;font-family:inherit;letter-spacing:.01em}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#b0684e;transform:translateY(-1px);box-shadow:var(--shadow)}
+.btn-secondary{background:var(--bg-secondary);color:var(--text-secondary);border:1px solid var(--border)}.btn-secondary:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+.btn-ghost{background:transparent;color:var(--text-secondary);border:none;padding:8px 14px;font-size:13px}.btn-ghost:hover{color:var(--text-primary)}
+.btn-sm{padding:8px 16px;font-size:12px}.btn-xs{padding:5px 12px;font-size:11px}
+input,select,textarea{width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius-md);font-size:14px;font-family:inherit;background:var(--cream);color:var(--text-primary);transition:all .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+input::placeholder,textarea::placeholder{color:var(--text-tertiary)}textarea{resize:vertical;min-height:80px}
+.card{background:var(--cream);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow)}
+.card-hover{transition:all .25s;cursor:pointer}.card-hover:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.badge{display:inline-flex;align-items:center;padding:4px 12px;border-radius:var(--radius-xl);font-size:12px;font-weight:500;letter-spacing:.02em}
+.badge-accent{background:var(--accent-light);color:var(--accent)}.badge-rose{background:var(--rose-light);color:var(--rose)}.badge-sage{background:var(--sage-light);color:var(--sage)}
+.badge-lavender{background:var(--lavender-light);color:var(--lavender)}.badge-neutral{background:var(--bg-secondary);color:var(--text-secondary)}
+.badge-danger{background:var(--danger-light);color:var(--danger)}.badge-positive{background:var(--positive-light);color:var(--positive)}
+.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.gap-1{gap:4px}.gap-2{gap:8px}.gap-3{gap:12px}.gap-4{gap:16px}
+.mt-1{margin-top:4px}.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}
+.mb-1{margin-bottom:4px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}
+.py-2{padding-top:8px;padding-bottom:8px}.py-3{padding-top:12px;padding-bottom:12px}.py-4{padding-top:16px;padding-bottom:16px}
+.border-t{border-top:1.5px solid var(--border-light)}
+.text-sm{font-size:13px}.text-xs{font-size:11px}.text-secondary{color:var(--text-secondary)}.text-tertiary{color:var(--text-tertiary)}.font-semibold{font-weight:600}.w-full{width:100%}
+.book-spine{display:flex;flex-direction:column;justify-content:flex-end;padding:12px 8px;border-radius:4px 8px 8px 4px;min-height:140px;width:90px;position:relative;overflow:hidden;transition:all .3s;cursor:pointer;flex-shrink:0}
+.book-spine:hover{transform:translateY(-6px) rotate(-2deg);box-shadow:var(--shadow-lg)}
+.book-spine::before{content:'';position:absolute;left:4px;top:0;bottom:0;width:2px;background:rgba(255,255,255,.2)}
+.book-spine-title{font-family:var(--font-serif);font-size:11px;font-weight:600;color:#fff;line-height:1.3;text-shadow:0 1px 3px rgba(0,0,0,.3);word-break:break-word}
+.book-spine-author{font-size:9px;color:rgba(255,255,255,.8);margin-top:4px}
+.shelf{background:linear-gradient(to bottom,var(--bg-tertiary) 0%,var(--bg-tertiary) 85%,var(--border) 85%,var(--border) 87%,var(--bg-tertiary) 87%);padding:20px 16px 8px;border-radius:var(--radius-md);display:flex;gap:10px;overflow-x:auto}
+.star-btn{cursor:pointer;opacity:.6;transition:all .15s;display:inline-flex}.star-btn:hover{opacity:1;transform:scale(1.15)}
+.comment{padding:14px 16px;background:var(--bg-secondary);border-radius:var(--radius-md)}
+.comment-reply{margin-left:20px;margin-top:10px;padding:10px 14px;border-left:2px solid var(--accent);border-radius:0 var(--radius-sm) var(--radius-sm) 0;background:var(--bg-tertiary)}
+.status-btn{padding:6px 16px;border-radius:var(--radius-xl);border:1.5px solid var(--border);background:transparent;color:var(--text-secondary);font-size:12px;cursor:pointer;font-weight:500;transition:all .2s}
+.status-btn.active{background:var(--text-primary);color:var(--bg);border-color:var(--text-primary)}
+.status-btn:hover:not(.active){border-color:var(--accent);color:var(--accent)}
+.poll-option{padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.poll-option:hover{border-color:var(--accent);background:var(--accent-soft)}
+.poll-option.voted{border-color:var(--accent);background:var(--accent-light)}
+.poll-bar{position:absolute;left:0;top:0;bottom:0;background:var(--accent-light);opacity:.5;transition:width .4s ease;z-index:0}
+.poll-text{position:relative;z-index:1}
+.feed-post{padding:18px 20px;background:var(--cream);border:1.5px solid var(--border-light);border-radius:var(--radius-lg);margin-bottom:12px}
+.feed-post-admin{border-left:3px solid var(--accent)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .35s ease-out}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--text-tertiary)}
+@media(max-width:480px){h1{font-size:28px}h2{font-size:22px}.container{padding:16px}.book-spine{min-height:120px;width:75px}}
+</style>
+<base target="_blank">
+</head>
+<body>
+<div id="app" class="container"></div>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const app=$('app');
+let currentUser=null,view='landing',selectedClubId=null,selectedBookId=null;
+const generateId=()=>Math.random().toString(36).slice(2,11);
+
+let clubs=JSON.parse(localStorage.getItem('bc_clubs')||'[]');
+let books=JSON.parse(localStorage.getItem('bc_books')||'[]');
+let members=JSON.parse(localStorage.getItem('bc_members')||'[]');
+let statuses=JSON.parse(localStorage.getItem('bc_statuses')||'[]');
+let ratings=JSON.parse(localStorage.getItem('bc_ratings')||'[]');
+let comments=JSON.parse(localStorage.getItem('bc_comments')||'[]');
+let polls=JSON.parse(localStorage.getItem('bc_polls')||'[]');
+let votes=JSON.parse(localStorage.getItem('bc_votes')||'[]');
+let posts=JSON.parse(localStorage.getItem('bc_posts')||'[]');
+
+function saveAll(){
+  localStorage.setItem('bc_clubs',JSON.stringify(clubs));
+  localStorage.setItem('bc_books',JSON.stringify(books));
+  localStorage.setItem('bc_members',JSON.stringify(members));
+  localStorage.setItem('bc_statuses',JSON.stringify(statuses));
+  localStorage.setItem('bc_ratings',JSON.stringify(ratings));
+  localStorage.setItem('bc_comments',JSON.stringify(comments));
+  localStorage.setItem('bc_polls',JSON.stringify(polls));
+  localStorage.setItem('bc_votes',JSON.stringify(votes));
+  localStorage.setItem('bc_posts',JSON.stringify(posts));
+}
+
+const bookColors=['#c4785a','#8fa68e','#a89bb8','#c97b7b','#c9a05c','#7a9eb8','#b8a07a','#8e7ab8'];
+function getBookColor(bookId){
+  let hash=0;
+  for(let i=0;i<bookId.length;i++)hash=bookId.charCodeAt(i)+((hash<<5)-hash);
+  return bookColors[Math.abs(hash)%bookColors.length];
+}
+
+function seedData(){
+  if(clubs.length>0)return;
+  const u1=generateId(),u2=generateId(),u3=generateId(),u4=generateId();
+  const c1=generateId(),c2=generateId();
+  const b1=generateId(),b2=generateId(),b3=generateId(),b4=generateId();
+  const p1=generateId();
+  clubs=[
+    {id:c1,name:"The Page Turners",frequency:"Monthly",adminIds:[u1,u2],memberIds:[u1,u2,u3,u4],inviteCode:generateId()},
+    {id:c2,name:"Sci-Fi Syndicate",frequency:"Biweekly",adminIds:[u3],memberIds:[u1,u3,u4],inviteCode:generateId()}
+  ];
+  books=[
+    {id:b1,clubId:c1,title:"The Midnight Library",author:"Matt Haig",synopsis:"Between life and death there is a library, and within that library, the shelves go on forever. Every book provides a chance to try another life you could have lived.",discussionDate:"2026-08-15",discussionTime:"19:00",discussionLink:"https://meet.google.com/example",active:true},
+    {id:b2,clubId:c1,title:"Project Hail Mary",author:"Andy Weir",synopsis:"Ryland Grace is the sole survivor on a desperate, last-chance mission. He can't even remember his own name, let alone the nature of his assignment.",discussionDate:"2026-06-20",discussionTime:"18:30",discussionLink:"",active:false},
+    {id:b3,clubId:c2,title:"Dune",author:"Frank Herbert",synopsis:"Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family tasked with ruling an inhospitable world.",discussionDate:"2026-08-10",discussionTime:"20:00",discussionLink:"https://zoom.us/example",active:true},
+    {id:b4,clubId:c2,title:"The Three-Body Problem",author:"Cixin Liu",synopsis:"Set against the backdrop of China's Cultural Revolution, a secret military project sends signals into space to establish contact with aliens.",discussionDate:"2026-07-01",discussionTime:"19:30",discussionLink:"",active:false}
+  ];
+  members=[
+    {id:u1,name:"Alice",email:"alice@example.com"},
+    {id:u2,name:"Bob",email:"bob@example.com"},
+    {id:u3,name:"Charlie",email:"charlie@example.com"},
+    {id:u4,name:"Dana",email:"dana@example.com"}
+  ];
+  statuses=[
+    {memberId:u1,bookId:b1,status:"Finished"},{memberId:u2,bookId:b1,status:"Started"},{memberId:u3,bookId:b1,status:"Not Started"},{memberId:u4,bookId:b1,status:"Finished"},
+    {memberId:u1,bookId:b2,status:"Finished"},{memberId:u2,bookId:b2,status:"Finished"},{memberId:u3,bookId:b2,status:"DNF"},{memberId:u4,bookId:b2,status:"Finished"},
+    {memberId:u1,bookId:b3,status:"Started"},{memberId:u3,bookId:b3,status:"Finished"},{memberId:u4,bookId:b3,status:"Not Started"},
+    {memberId:u1,bookId:b4,status:"Finished"},{memberId:u3,bookId:b4,status:"Finished"},{memberId:u4,bookId:b4,status:"Finished"}
+  ];
+  ratings=[
+    {memberId:u1,bookId:b1,rating:5},{memberId:u4,bookId:b1,rating:4},
+    {memberId:u1,bookId:b2,rating:5},{memberId:u2,bookId:b2,rating:4},{memberId:u4,bookId:b2,rating:5},
+    {memberId:u3,bookId:b3,rating:5},
+    {memberId:u1,bookId:b4,rating:4},{memberId:u3,bookId:b4,rating:5},{memberId:u4,bookId:b4,rating:4}
+  ];
+  comments=[
+    {id:generateId(),bookId:b1,memberId:u1,text:"Absolutely loved the concept! The idea of a library between life and death is so beautifully executed.",parentId:null,createdAt:Date.now()-86400000},
+    {id:generateId(),bookId:b1,memberId:u4,text:"Same here, the ending made me cry. Nora's journey really resonated with me.",parentId:null,createdAt:Date.now()-80000000},
+    {id:generateId(),bookId:b1,memberId:u2,text:"Which ending? The one with Nora choosing to go back?",parentId:null,createdAt:Date.now()-70000000},
+    {id:generateId(),bookId:b1,memberId:u4,text:"Yes, exactly that one. When she realizes that the imperfect life is still worth living.",parentId:null,createdAt:Date.now()-60000000}
+  ];
+  polls=[{id:p1,clubId:c1,question:"What should we read next?",options:["Klara and the Sun","The House in the Cerulean Sea","Circe","The Invisible Life of Addie LaRue"],createdAt:Date.now()-172800000,active:true}];
+  votes=[{pollId:p1,memberId:u1,optionIndex:2},{pollId:p1,memberId:u2,optionIndex:1},{pollId:p1,memberId:u4,optionIndex:2}];
+  posts=[
+    {id:generateId(),clubId:c1,memberId:u1,title:"Welcome to our August cycle!",content:"So excited to dive into The Midnight Library together. Remember, our discussion is on August 15th at 7pm. Bring your thoughts on the concept of parallel lives!",createdAt:Date.now()-90000000},
+    {id:generateId(),clubId:c1,memberId:u2,title:"Discussion link updated",content:"Hey everyone, I've updated the Google Meet link for our discussion. Make sure to check the book details page for the latest link. Can't wait to see you all there!",createdAt:Date.now()-40000000}
+  ];
+  saveAll();
+}
+
+const statusOptions=["Not Started","Started","DNF","Finished"];
+const statusBadgeClass={"Not Started":"badge-neutral","Started":"badge-sage","DNF":"badge-danger","Finished":"badge-positive"};
+
+function getClub(id){return clubs.find(c=>c.id===id)}
+function getBook(id){return books.find(b=>b.id===id)}
+function getMember(id){return members.find(m=>m.id===id)}
+function getStatus(memberId,bookId){return statuses.find(s=>s.memberId===memberId&&s.bookId===bookId)}
+function getRating(memberId,bookId){return ratings.find(r=>r.memberId===memberId&&r.bookId===bookId)}
+function getComments(bookId){return comments.filter(c=>c.bookId===bookId).sort((a,b)=>a.createdAt-b.createdAt)}
+function getClubBooks(clubId){return books.filter(b=>b.clubId===clubId).sort((a,b)=>(a.active?-1:1)||b.discussionDate.localeCompare(a.discussionDate))}
+function getClubMembers(clubId){return members.filter(m=>getClub(clubId).memberIds.includes(m.id))}
+function isAdmin(clubId){return getClub(clubId).adminIds.includes(currentUser.id)}
+function getClubPolls(clubId){return polls.filter(p=>p.clubId===clubId&&p.active).sort((a,b)=>b.createdAt-a.createdAt)}
+function getClubPosts(clubId){return posts.filter(p=>p.clubId===clubId).sort((a,b)=>b.createdAt-a.createdAt)}
+
+function avgRating(bookId){
+  const r=ratings.filter(x=>x.bookId===bookId).map(x=>x.rating);
+  return r.length?(r.reduce((a,b)=>a+b,0)/r.length).toFixed(1):"—";
+}
+function statusBreakdown(bookId){
+  const s=statuses.filter(x=>x.bookId===bookId),out={};
+  statusOptions.forEach(o=>out[o]=0);
+  s.forEach(x=>out[x.status]++);
+  return out;
+}
+function formatDate(d){if(!d)return"";const[y,m,day]=d.split('-');return m+'/'+day+'/'+y}
+function formatTimeAgo(ts){
+  const diff=Date.now()-ts,mins=Math.floor(diff/60000),hrs=Math.floor(diff/3600000),days=Math.floor(diff/86400000);
+  if(mins<1)return'just now';if(mins<60)return mins+'m ago';if(hrs<24)return hrs+'h ago';if(days<7)return days+'d ago';
+  return new Date(ts).toLocaleDateString();
+}
+function starSVG(filled,color){
+  return '<svg width="18" height="18" viewBox="0 0 24 24" fill="'+(filled?color:'none')+'" stroke="'+color+'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+}
+function renderStars(rating,interactive,bookId){
+  let html='<span class="flex gap-1 items-center">';
+  for(let i=1;i<=5;i++){
+    const fill=i<=rating,col=fill?'var(--accent)':'var(--border)';
+    if(interactive)html+='<span class="star-btn" data-val="'+i+'" data-book="'+bookId+'">'+starSVG(fill,col)+'</span>';
+    else html+=starSVG(fill,col);
+  }
+  return html+'</span>';
+}
+function renderBookShelf(clubId){
+  const clubBooks=getClubBooks(clubId);
+  if(clubBooks.length===0)return'';
+  let html='<div style="margin-bottom:24px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
+  html+='<h3 style="font-family:var(--font-serif);">The Bookshelf</h3><span class="text-sm text-secondary">'+clubBooks.length+' book'+(clubBooks.length!==1?'s':'')+'</span></div><div class="shelf">';
+  clubBooks.forEach(b=>{
+    html+='<div class="book-spine" data-id="'+b.id+'" style="background:'+getBookColor(b.id)+';">';
+    html+='<div class="book-spine-title">'+b.title+'</div><div class="book-spine-author">'+b.author+'</div>';
+    if(b.active)html+='<div style="position:absolute;top:6px;right:6px;width:6px;height:6px;background:#fff;border-radius:50%;box-shadow:0 0 4px rgba(255,255,255,0.6);"></div>';
+    html+='</div>';
+  });
+  return html+'</div></div>';
+}
+function renderPoll(poll){
+  const totalVotes=votes.filter(v=>v.pollId===poll.id).length;
+  const myVote=votes.find(v=>v.pollId===poll.id&&v.memberId===currentUser.id);
+  const counts=poll.options.map((_,i)=>votes.filter(v=>v.pollId===poll.id&&v.optionIndex===i).length);
+  const maxCount=Math.max(...counts,1);
+  let html='<div class="card mb-3" style="border-left:3px solid var(--lavender);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
+  html+='<div><div class="text-xs text-tertiary" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Club Poll</div>';
+  html+='<div style="font-family:var(--font-serif);font-size:16px;font-weight:600;">'+poll.question+'</div></div>';
+  html+='<span class="badge badge-lavender">'+totalVotes+' vote'+(totalVotes!==1?'s':'')+'</span></div><div class="flex flex-col gap-2">';
+  poll.options.forEach((opt,i)=>{
+    const count=counts[i],pct=totalVotes?Math.round((count/totalVotes)*100):0;
+    const isMine=myVote&&myVote.optionIndex===i;
+    html+='<div class="poll-option '+(isMine?'voted':'')+'" data-poll="'+poll.id+'" data-opt="'+i+'">';
+    html+='<div class="poll-bar" style="width:'+pct+'%;"></div>';
+    html+='<div class="poll-text flex justify-between items-center"><span class="text-sm '+(isMine?'font-semibold':'')+'">'+opt+'</span>';
+    html+='<span class="text-xs text-secondary">'+count+' ('+pct+'%)</span></div></div>';
+  });
+  html+='</div>';
+  if(isAdmin(selectedClubId)&&poll.active){
+    html+='<div class="border-t mt-3 pt-3"><button class="btn btn-ghost btn-xs close-poll" data-poll="'+poll.id+'" style="color:var(--text-tertiary);">Close Poll</button></div>';
+  }
+  return html+'</div>';
+}
+function renderFeedPost(post){
+  const author=getMember(post.memberId);
+  const isAdminPost=isAdmin(selectedClubId)&&post.memberId===currentUser.id;
+  let html='<div class="feed-post '+(isAdminPost?'feed-post-admin':'')+' fade-in">';
+  html+='<div class="flex justify-between items-start mb-2"><div class="flex items-center gap-2">';
+  html+='<div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;">'+(author?author.name[0]:'?')+'</div>';
+  html+='<div><div class="text-sm font-semibold">'+(author?author.name:'Unknown')+(isAdminPost?' <span class="badge badge-accent" style="margin-left:4px;font-size:9px;padding:2px 8px;">admin</span>':'')+'</div>';
+  html+='<div class="text-xs text-tertiary">'+formatTimeAgo(post.createdAt)+'</div></div></div></div>';
+  html+='<div style="font-family:var(--font-serif);font-size:16px;font-weight:600;margin-bottom:6px;">'+post.title+'</div>';
+  html+='<div class="text-sm text-secondary" style="line-height:1.6;">'+escapeHtml(post.content)+'</div></div>';
+  return html;
+}
+function escapeHtml(text){const div=document.createElement('div');div.textContent=text;return div.innerHTML}
+
+function renderLanding(){
+  app.innerHTML='<div class="fade-in" style="text-align:center;padding:80px 20px;"><div style="font-size:56px;margin-bottom:20px;">🌸</div><h1 style="margin-bottom:12px;color:var(--accent);">Bloom & Bind</h1><p style="font-family:var(--font-serif);font-size:18px;color:var(--text-secondary);margin-bottom:8px;font-style:italic;">Where stories gather and friendships grow</p><p class="text-secondary" style="margin-bottom:48px;max-width:420px;margin-left:auto;margin-right:auto;font-size:14px;">A beautiful space for book clubs to organize reads, track progress, vote on picks, and share thoughtful discussions.</p><button id="btn-start" class="btn btn-primary" style="padding:14px 36px;font-size:15px;border-radius:var(--radius-xl);">Enter Your Library</button><p class="text-xs text-tertiary" style="margin-top:20px;">No account needed. Your bookshelves stay in your browser.</p></div>';
+  $('btn-start').onclick=()=>{view='create-user';render()};
+}
+function renderCreateUser(){
+  app.innerHTML='<div class="fade-in" style="max-width:380px;margin:0 auto;padding:60px 16px;"><button id="btn-back" class="btn btn-ghost" style="margin-bottom:28px;padding-left:0;">← Back</button><div style="text-align:center;margin-bottom:28px;"><div style="font-size:40px;margin-bottom:12px;">📖</div><h2 style="margin-bottom:6px;">Welcome, Reader</h2><p class="text-secondary text-sm">Enter your name to step into your library.</p></div><input id="username" placeholder="Your name" style="margin-bottom:12px;"/><input id="useremail" type="email" placeholder="Your email (optional, for invites)" style="margin-bottom:20px;"/><button id="btn-join" class="btn btn-primary w-full">Continue</button></div>';
+  $('btn-back').onclick=()=>{view='landing';render()};
+  $('btn-join').onclick=()=>{
+    const name=$('username').value.trim(),email=$('useremail').value.trim();
+    if(!name){$('username').style.borderColor='var(--danger)';setTimeout(()=>$('username').style.borderColor='var(--border)',2000);return}
+    const existing=members.find(m=>m.name.toLowerCase()===name.toLowerCase());
+    if(existing){currentUser=existing;if(email){existing.email=email;saveAll()}}else{currentUser={id:generateId(),name:name,email:email};members.push(currentUser);saveAll()}
+    view='dashboard';render();
+  };
+}
+function renderDashboard(){
+  const myClubs=clubs.filter(c=>c.memberIds.includes(currentUser.id));
+  let html='<div class="fade-in"><div style="text-align:center;padding:20px 0 28px;"><h2 style="font-family:var(--font-serif);margin-bottom:4px;">Hello, '+currentUser.name+'</h2><p class="text-secondary text-sm">'+myClubs.length+' club'+(myClubs.length!==1?'s':'')+' • '+statuses.filter(s=>s.memberId===currentUser.id&&s.status==='Finished').length+' books finished</p></div>';
+  html+='<div class="flex justify-between items-center mb-4"><span class="text-sm font-semibold text-secondary">Your Clubs</span><button id="btn-new-club" class="btn btn-primary btn-sm" style="border-radius:var(--radius-xl);">+ New Club</button></div>';
+  if(myClubs.length===0){
+    html+='<div style="text-align:center;padding:48px 20px;" class="card"><div style="font-size:36px;margin-bottom:12px;">📚</div><p class="text-secondary" style="margin-bottom:6px;">No clubs yet</p><p class="text-sm text-tertiary">Create your first book club to begin.</p></div>';
+  }else{
+    html+='<div class="flex flex-col gap-3">';
+    myClubs.forEach(c=>{
+      const activeBook=books.find(b=>b.clubId===c.id&&b.active);
+      const bookCount=books.filter(b=>b.clubId===c.id).length;
+      html+='<div class="club-card card card-hover" data-id="'+c.id+'" style="display:flex;gap:16px;align-items:center;"><div style="width:50px;height:50px;border-radius:var(--radius-md);background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:22px;">📖</div><div style="flex:1;"><div class="font-semibold" style="font-size:15px;">'+c.name+'</div><div class="text-sm text-secondary mt-1">'+(activeBook?'Reading: '+activeBook.title:bookCount+' book'+(bookCount!==1?'s':'')+' in library')+'</div></div><span class="badge badge-neutral">'+c.frequency+'</span></div>';
+    });
+    html+='</div>';
+  }
+  html+='<div class="border-t mt-4 py-3"><button id="btn-my-history" class="btn btn-ghost" style="padding-left:0;">📖 My Reading History</button></div>';
+  html+='<div class="border-t py-3"><button id="btn-switch-user" class="btn btn-ghost" style="padding-left:0;color:var(--text-tertiary);">👤 Switch Reader</button></div></div>';
+  app.innerHTML=html;
+  document.querySelectorAll('.club-card').forEach(el=>{el.onclick=()=>{selectedClubId=el.dataset.id;view='club-home';render()}});
+  $('btn-new-club').onclick=()=>{view='create-club';render()};
+  $('btn-my-history').onclick=()=>{view='member-view';render()};
+  $('btn-switch-user').onclick=()=>{currentUser=null;view='create-user';render()};
+}
+function renderCreateClub(){
+  app.innerHTML='<div class="fade-in" style="max-width:420px;margin:0 auto;padding:24px 0;"><button id="btn-back" class="btn btn-ghost" style="margin-bottom:20px;padding-left:0;">← Back</button><h2 style="margin-bottom:6px;">Create a Club</h2><p class="text-secondary text-sm" style="margin-bottom:28px;">Start a new reading circle.</p><label class="text-sm text-secondary" style="display:block;margin-bottom:6px;">Club Name</label><input id="club-name" placeholder="e.g. The Literary Circle" style="margin-bottom:16px;"/><label class="text-sm text-secondary" style="display:block;margin-bottom:6px;">Pick Frequency</label><select id="club-freq" style="margin-bottom:28px;"><option>Weekly</option><option>Biweekly</option><option selected>Monthly</option><option>Quarterly</option><option>Custom</option></select><button id="btn-create" class="btn btn-primary w-full">Create Club</button></div>';
+  $('btn-back').onclick=()=>{view='dashboard';render()};
+  $('btn-create').onclick=()=>{
+    const name=$('club-name').value.trim();
+    if(!name){$('club-name').style.borderColor='var(--danger)';setTimeout(()=>$('club-name').style.borderColor='var(--border)',2000);return}
+    const club={id:generateId(),name:name,frequency:$('club-freq').value,adminIds:[currentUser.id],memberIds:[currentUser.id],inviteCode:generateId()};
+    clubs.push(club);saveAll();selectedClubId=club.id;view='club-home';render();
+  };
+}
+function renderClubHome(){
+  const club=getClub(selectedClubId);
+  if(!club){view='dashboard';render();return}
+  const activeBook=books.find(b=>b.clubId===selectedClubId&&b.active);
+  const isAdm=isAdmin(selectedClubId);
+  const clubPolls=getClubPolls(selectedClubId);
+  const clubPosts=getClubPosts(selectedClubId);
+  let html='<div class="fade-in"><div style="margin-bottom:16px;"><button id="btn-back" class="btn btn-ghost" style="padding-left:0;">← Dashboard</button></div>';
+  html+='<div style="text-align:center;padding:8px 0 20px;"><h2 style="font-family:var(--font-serif);">'+club.name+'</h2><p class="text-secondary text-sm mt-1">'+club.frequency+' • '+club.memberIds.length+' members</p></div>';
+  html+=renderBookShelf(selectedClubId);
+  if(activeBook){
+    const bd=statusBreakdown(activeBook.id);
+    const myStatus=getStatus(currentUser.id,activeBook.id);
+    const myRating=getRating(currentUser.id,activeBook.id);
+    html+='<div class="card mb-4" style="border-left:3px solid var(--accent);"><div class="flex justify-between items-start mb-3"><div><div class="text-xs font-semibold text-tertiary" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">✨ Current Pick</div><h3>'+activeBook.title+'</h3><p class="text-secondary text-sm mt-1">by '+activeBook.author+'</p></div>'+(isAdm?'<button id="btn-end-book" class="btn btn-secondary btn-xs">End Cycle</button>':'')+'</div>';
+    html+='<p class="text-secondary text-sm" style="line-height:1.7;margin-bottom:14px;">'+activeBook.synopsis+'</p>';
+    html+='<div class="flex gap-4 flex-wrap text-sm text-secondary mb-3"><span>📅 '+formatDate(activeBook.discussionDate)+' '+(activeBook.discussionTime||'')+'</span>'+(activeBook.discussionLink?'<a href="'+activeBook.discussionLink+'" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500;">🔗 Join Discussion</a>':'')+'</div>';
+    html+='<div class="flex gap-2 flex-wrap mb-4">'+Object.entries(bd).map(e=>e[1]>0?'<span class="badge '+statusBadgeClass[e[0]]+'">'+e[1]+' '+e[0]+'</span>':'').join('')+'</div>';
+    html+='<div class="border-t py-3"><div class="flex justify-between items-center mb-3"><span class="text-sm font-semibold">Your Progress</span><span id="your-rating">'+renderStars(myRating?myRating.rating:0,true,activeBook.id)+'</span></div>';
+    html+='<div class="flex gap-2 flex-wrap">'+statusOptions.map(s=>'<button class="status-btn '+(myStatus&&myStatus.status===s?'active':'')+'" data-s="'+s+'" data-book="'+activeBook.id+'">'+s+'</button>').join('')+'</div></div>';
+    html+='<div class="border-t py-3"><span class="text-sm font-semibold" style="display:block;margin-bottom:10px;">Discussion</span><div id="comments-area">'+renderComments(activeBook.id)+'</div><div class="flex gap-2 mt-3"><input id="comment-input" placeholder="Share your thoughts..." style="flex:1;"/><button id="btn-comment" class="btn btn-primary btn-sm">Post</button></div></div></div>';
+  }
+  if(clubPolls.length>0){html+='<div style="margin-bottom:8px;"><span class="text-sm font-semibold text-secondary">Active Polls</span></div>';clubPolls.forEach(p=>html+=renderPoll(p))}
+  if(isAdm)html+='<div style="text-align:center;margin-bottom:20px;"><button id="btn-new-poll" class="btn btn-secondary btn-sm" style="border-style:dashed;border-radius:var(--radius-xl);">+ Create Poll</button></div>';
+  html+='<div style="margin-bottom:8px;"><span class="text-sm font-semibold text-secondary">Club Feed</span></div>';
+  if(clubPosts.length===0)html+='<div class="card" style="text-align:center;padding:32px;"><p class="text-tertiary text-sm">No announcements yet.</p></div>';
+  else clubPosts.forEach(p=>html+=renderFeedPost(p));
+  if(isAdm)html+='<div style="text-align:center;margin:16px 0 24px;"><button id="btn-new-post" class="btn btn-secondary btn-sm" style="border-style:dashed;border-radius:var(--radius-xl);">+ New Announcement</button></div>';
+  html+='<div class="flex gap-2 flex-wrap" style="margin-bottom:20px;"><button id="btn-archive" class="btn btn-secondary btn-sm">📚 Book Archive</button>'+(isAdm?'<button id="btn-manage" class="btn btn-secondary btn-sm">👥 Members</button>':'')+(isAdm?'<button id="btn-invite" class="btn btn-secondary btn-sm">✉️ Invite</button>':'')+'</div></div>';
+  app.innerHTML=html;
+
+  $('btn-back').onclick=()=>{view='dashboard';render()};
+  $('btn-archive').onclick=()=>{view='book-archive';render()};
+  if($('btn-manage'))$('btn-manage').onclick=()=>{view='manage-members';render()};
+  if($('btn-invite'))$('btn-invite').onclick=()=>{view='invite-members';render()};
+  if($('btn-new-poll'))$('btn-new-poll').onclick=()=>{view='create-poll';render()};
+  if($('btn-new-post'))$('btn-new-post').onclick=()=>{view='create-post';render()};
+  if($('btn-end-book'))$('btn-end-book').onclick=()=>{if(!confirm('End this reading cycle?'))return;activeBook.active=false;saveAll();renderClubHome()};
+
+  document.querySelectorAll('.book-spine').forEach(el=>{el.onclick=()=>{selectedBookId=el.dataset.id;view='book-detail';render()}});
+  document.querySelectorAll('.status-btn').forEach(btn=>{btn.onclick=()=>{const s=statuses.find(x=>x.memberId===currentUser.id&&x.bookId===btn.dataset.book);if(s)s.status=btn.dataset.s;else statuses.push({memberId:currentUser.id,bookId:btn.dataset.book,status:btn.dataset.s});saveAll();renderClubHome()}});
+  document.querySelectorAll('.star-btn').forEach(btn=>{btn.onclick=()=>{const val=parseInt(btn.dataset.val),bookId=btn.dataset.book;const r=ratings.find(x=>x.memberId===currentUser.id&&x.bookId===bookId);if(r)r.rating=val;else ratings.push({memberId:currentUser.id,bookId:bookId,rating:val});saveAll();renderClubHome()}});
+  if($('btn-comment')){$('btn-comment').onclick=()=>{const text=$('comment-input').value.trim();if(!text)return;comments.push({id:generateId(),bookId:activeBook.id,memberId:currentUser.id,text:text,parentId:null,createdAt:Date.now()});saveAll();$('comments-area').innerHTML=renderComments(activeBook.id);$('comment-input').value='';attachCommentListeners(activeBook.id)}};
+  attachCommentListeners(activeBook?activeBook.id:null);
+  document.querySelectorAll('.poll-option').forEach(el=>{el.onclick=()=>{const pollId=el.dataset.poll,optIdx=parseInt(el.dataset.opt);const existing=votes.find(v=>v.pollId===pollId&&v.memberId===currentUser.id);if(existing)existing.optionIndex=optIdx;else votes.push({pollId:pollId,memberId:currentUser.id,optionIndex:optIdx});saveAll();renderClubHome()}});
+  document.querySelectorAll('.close-poll').forEach(btn=>{btn.onclick=()=>{const poll=polls.find(p=>p.id===btn.dataset.poll);if(poll){poll.active=false;saveAll();renderClubHome()}}});
+}
+function renderComments(bookId){
+  if(!bookId)return'';
+  const cs=getComments(bookId);
+  if(cs.length===0)return'<div class="text-sm text-tertiary" style="padding:8px 0;">No comments yet. Be the first to share your thoughts!</div>';
+  let html='<div class="flex flex-col gap-3">';
+  cs.forEach(c=>{
+    const author=getMember(c.memberId),isMe=c.memberId===currentUser.id;
+    html+='<div class="comment"><div class="flex justify-between items-center mb-1"><span class="text-sm font-semibold">'+(author?author.name:'Unknown')+(isMe?' <span class="text-xs text-tertiary">(you)</span>':'')+'</span><span class="text-xs text-tertiary">'+formatTimeAgo(c.createdAt)+'</span></div>';
+    html+='<div class="text-sm text-secondary" style="line-height:1.6;">'+escapeHtml(c.text)+'</div>';
+    html+='<button class="reply-btn btn btn-ghost" data-id="'+c.id+'" style="margin-top:6px;padding-left:0;font-size:11px;">Reply</button>';
+    html+='<div class="reply-box" data-parent="'+c.id+'" style="display:none;margin-top:8px;"><input class="reply-input" data-parent="'+c.id+'" placeholder="Write a reply..." style="margin-bottom:6px;"/><button class="reply-submit btn btn-primary btn-xs" data-parent="'+c.id+'">Reply</button></div>';
+    html+=renderReplies(bookId,c.id)+'</div>';
+  });
+  return html+'</div>';
+}
+function renderReplies(bookId,parentId){
+  const rs=comments.filter(c=>c.bookId===bookId&&c.parentId===parentId).sort((a,b)=>a.createdAt-b.createdAt);
+  if(rs.length===0)return'';
+  let html='<div class="flex flex-col gap-2">';
+  rs.forEach(r=>{const author=getMember(r.memberId);html+='<div class="comment-reply"><div class="flex justify-between items-center mb-1"><span class="text-xs font-semibold">'+(author?author.name:'Unknown')+'</span><span class="text-xs text-tertiary">'+formatTimeAgo(r.createdAt)+'</span></div><div class="text-xs text-secondary" style="line-height:1.5;">'+escapeHtml(r.text)+'</div></div>'});
+  return html+'</div>';
+}
+function attachCommentListeners(bookId){
+  if(!bookId)return;
+  document.querySelectorAll('.reply-btn').forEach(btn=>{btn.onclick=()=>{const box=document.querySelector('.reply-box[data-parent="'+btn.dataset.id+'"]');if(box)box.style.display=box.style.display==='none'?'block':'none'}});
+  document.querySelectorAll('.reply-submit').forEach(btn=>{btn.onclick=()=>{const parentId=btn.dataset.parent;const input=document.querySelector('.reply-input[data-parent="'+parentId+'"]');if(!input)return;const text=input.value.trim();if(!text)return;comments.push({id:generateId(),bookId:bookId,memberId:currentUser.id,text:text,parentId:parentId,createdAt:Date.now()});saveAll();const area=document.getElementById('comments-area');if(area){area.innerHTML=renderComments(bookId);attachCommentListeners(bookId)}}});
+}
+
+function renderAddBook(){
+  app.innerHTML='<div class="fade-in" style="max-width:420px;margin:0 auto;padding:24px 0;"><button id="btn-back" class="btn btn-ghost" style="margin-bottom:16px;padding-left:0;">← Back to Club</button><h2 style="margin-bottom:6px;">Add New Book</h2><p class="text-secondary text-sm" style="margin-bottom:24px;">Start a new reading cycle.</p><label class="text-sm text-secondary">Title</label><input id="b-title" placeholder="Book title" style="margin-bottom:12px;"/><label class="text-sm text-secondary">Author</label><input id="b-author" placeholder="Author name" style="margin-bottom:12px;"/><label class="text-sm text-secondary">Synopsis</label><textarea id="b-synopsis" rows="3" placeholder="A brief summary..." style="margin-bottom:12px;"></textarea><div class="flex gap-3" style="margin-bottom:12px;"><div style="flex:1;"><label class="text-sm text-secondary">Date</label><input id="b-date" type="date" style="margin:0;"/></div><div style="flex:1;"><label class="text-sm text-secondary">Time</label><input id="b-time" type="time" style="margin:0;"/></div></div><label class="text-sm text-secondary">Discussion Link (optional)</label><input id="b-link" placeholder="https://..." style="margin-bottom:24px;"/><button id="btn-save-book" class="btn btn-primary w-full">Start Cycle</button></div>';
+  $('btn-back').onclick=()=>{view='club-home';render()};
+  $('btn-save-book').onclick=()=>{
+    const title=$('b-title').value.trim(),author=$('b-author').value.trim();
+    if(!title||!author){if(!title)$('b-title').style.borderColor='var(--danger)';if(!author)$('b-author').style.borderColor='var(--danger)';setTimeout(()=>{$('b-title').style.borderColor='var(--border)';$('b-author').style.borderColor='var(--border)'},2000);return}
+    books.filter(b=>b.clubId===selectedClubId).forEach(b=>b.active=false);
+    books.push({id:generateId(),clubId:selectedClubId,title:title,author:author,synopsis:$('b-synopsis').value.trim(),discussionDate:$('b-date').value,discussionTime:$('b-time').value,discussionLink:$('b-link').value.trim(),active:true});
+    saveAll();view='club-home';render();
+  };
+}
+function renderCreatePoll(){
+  app.innerHTML='<div class="fade-in" style="max-width:420px;margin:0 auto;padding:24px 0;"><button id="btn-back" class="btn btn-ghost" style="margin-bottom:16px;padding-left:0;">← Back to Club</button><h2 style="margin-bottom:6px;">Create a Poll</h2><p class="text-secondary text-sm" style="margin-bottom:24px;">Let members vote on the next read.</p><label class="text-sm text-secondary">Question</label><input id="poll-q" placeholder="What should we read next?" style="margin-bottom:16px;"/><label class="text-sm text-secondary">Options (one per line)</label><textarea id="poll-opts" rows="5" placeholder="Klara and the Sun&#10;The House in the Cerulean Sea&#10;Circe" style="margin-bottom:24px;"></textarea><button id="btn-create-poll" class="btn btn-primary w-full">Create Poll</button></div>';
+  $('btn-back').onclick=()=>{view='club-home';render()};
+  $('btn-create-poll').onclick=()=>{
+    const q=$('poll-q').value.trim();
+    const opts=$('poll-opts').value.split("\n").map(s=>s.trim()).filter(s=>s);
+    if(!q||opts.length<2){alert('Enter a question and at least 2 options.');return}
+    polls.push({id:generateId(),clubId:selectedClubId,question:q,options:opts,createdAt:Date.now(),active:true});
+    saveAll();view='club-home';render();
+  };
+}
+function renderCreatePost(){
+  app.innerHTML='<div class="fade-in" style="max-width:420px;margin:0 auto;padding:24px 0;"><button id="btn-back" class="btn btn-ghost" style="margin-bottom:16px;padding-left:0;">← Back to Club</button><h2 style="margin-bottom:6px;">New Announcement</h2><p class="text-secondary text-sm" style="margin-bottom:24px;">Share news with your club members.</p><label class="text-sm text-secondary">Title</label><input id="post-title" placeholder="e.g. Discussion moved to Thursday" style="margin-bottom:12px;"/><label class="text-sm text-secondary">Message</label><textarea id="post-content" rows="4" placeholder="Write your announcement..." style="margin-bottom:24px;"></textarea><button id="btn-create-post" class="btn btn-primary w-full">Post Announcement</button></div>';
+  $('btn-back').onclick=()=>{view='club-home';render()};
+  $('btn-create-post').onclick=()=>{
+    const title=$('post-title').value.trim(),content=$('post-content').value.trim();
+    if(!title||!content){alert('Enter both a title and message.');return}
+    posts.push({id:generateId(),clubId:selectedClubId,memberId:currentUser.id,title:title,content:content,createdAt:Date.now()});
+    saveAll();view='club-home';render();
+  };
+}
+function renderInviteMembers(){
+  const club=getClub(selectedClubId);
+  const inviteUrl=window.location.origin+window.location.pathname+'?join='+club.inviteCode;
+  let html='<div class="fade-in" style="max-width:420px;margin:0 auto;padding:24px 0;"><button id="btn-back" class="btn btn-ghost" style="margin-bottom:16px;padding-left:0;">← Back to Club</button><h2 style="margin-bottom:6px;">Invite Members</h2><p class="text-secondary text-sm" style="margin-bottom:24px;">Grow your reading circle.</p>';
+  html+='<div class="card mb-4" style="background:var(--accent-soft);border-color:var(--accent-light);"><div class="text-sm font-semibold mb-2">🔗 Shareable Invite Link</div><div class="flex gap-2"><input id="invite-link" value="'+inviteUrl+'" readonly style="flex:1;background:var(--bg);font-size:12px;"/><button id="btn-copy-link" class="btn btn-primary btn-sm">Copy</button></div><p class="text-xs text-tertiary mt-2">Anyone with this link can join '+club.name+'.</p></div>';
+  html+='<div class="card mb-4"><div class="text-sm font-semibold mb-3">✉️ Invite by Email</div><p class="text-xs text-secondary mb-3">Enter email addresses to send invites. (Requires backend setup for real emails.)</p><textarea id="invite-emails" rows="3" placeholder="alice@email.com, bob@email.com..." style="margin-bottom:12px;"></textarea><button id="btn-send-invites" class="btn btn-primary w-full">Send Invites</button></div>';
+  html+='<div class="card"><div class="text-sm font-semibold mb-2">📋 Current Members</div><div class="flex flex-col gap-2 mt-2">';
+  getClubMembers(selectedClubId).forEach(m=>{html+='<div class="flex justify-between items-center py-2 border-b" style="border-color:var(--border-light);"><span class="text-sm">'+m.name+(club.adminIds.includes(m.id)?' <span class="badge badge-accent" style="margin-left:4px;font-size:9px;">admin</span>':'')+'</span><span class="text-xs text-tertiary">'+(m.email||'No email')+'</span></div>'});
+  html+='</div></div></div>';
+  app.innerHTML=html;
+  $('btn-back').onclick=()=>{view='club-home';render()};
+  $('btn-copy-link').onclick=()=>{$('invite-link').select();document.execCommand('copy');$('btn-copy-link').textContent='Copied!';setTimeout(()=>$('btn-copy-link').textContent='Copy',2000)};
+  $('btn-send-invites').onclick=()=>{const emails=$('invite-emails').value.split(/[,\n]/).map(e=>e.trim()).filter(e=>e);if(emails.length===0)return;alert('In production, this would send '+emails.length+' invite email(s) via your backend.\n\nFor now, copy the invite link above and send it manually!')};
+}
+function renderManageMembers(){
+  const club=getClub(selectedClubId);
+  const clubMembers=getClubMembers(selectedClubId);
+  const nonMembers=members.filter(m=>!club.memberIds.includes(m.id));
+  let html='<div class="fade-in" style="padding:8px 0;"><button id="btn-back" class="btn btn-ghost" style="margin-bottom:16px;padding-left:0;">← Back to Club</button><h2 style="margin-bottom:16px;">Manage Members</h2>';
+  html+='<div class="mb-4"><p class="text-sm text-secondary font-semibold" style="margin-bottom:8px;">Current Members</p><div class="flex flex-col gap-2">';
+  clubMembers.forEach(m=>{
+    html+='<div class="card" style="padding:12px 16px;"><div class="flex justify-between items-center"><div class="flex items-center gap-3"><div style="width:36px;height:36px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:14px;font-weight:600;">'+m.name[0]+'</div><div><span class="text-sm font-semibold">'+m.name+'</span>'+(club.adminIds.includes(m.id)?'<span class="badge badge-accent" style="margin-left:6px;">admin</span>':'')+'</div></div><div class="flex gap-2">'+(!club.adminIds.includes(m.id)&&isAdmin(selectedClubId)?'<button class="promote-member btn btn-ghost btn-xs" data-id="'+m.id+'">Make Admin</button>':'')+(m.id!==currentUser.id?'<button class="remove-member btn btn-ghost btn-xs" style="color:var(--danger);" data-id="'+m.id+'">Remove</button>':'')+'</div></div></div>';
+  });
+  html+='</div></div>';
+  html+='<div class="mb-4"><p class="text-sm text-secondary font-semibold" style="margin-bottom:8px;">Add Existing Member</p><div class="flex flex-col gap-2">'+(nonMembers.length===0?'<p class="text-sm text-tertiary">No available members.</p>':'')+nonMembers.map(m=>'<div class="card card-hover" style="padding:10px 16px;"><div class="flex justify-between items-center"><span class="text-sm">'+m.name+'</span><button class="add-member btn btn-primary btn-xs" data-id="'+m.id+'">Add</button></div></div>').join('')+'</div></div>';
+  html+='<div class="border-t py-4"><p class="text-sm text-secondary font-semibold" style="margin-bottom:8px;">Invite New Person</p><div class="flex gap-2"><input id="new-member-name" placeholder="Name" style="flex:1;margin:0;"/><button id="btn-invite" class="btn btn-primary btn-sm">Invite</button></div></div></div>';
+  app.innerHTML=html;
+  $('btn-back').onclick=()=>{view='club-home';render()};
+  document.querySelectorAll('.remove-member').forEach(btn=>{btn.onclick=()=>{if(!confirm('Remove this member?'))return;club.memberIds=club.memberIds.filter(id=>id!==btn.dataset.id);club.adminIds=club.adminIds.filter(id=>id!==btn.dataset.id);saveAll();renderManageMembers()}});
+  document.querySelectorAll('.promote-member').forEach(btn=>{btn.onclick=()=>{if(!club.adminIds.includes(btn.dataset.id)){club.adminIds.push(btn.dataset.id);saveAll();renderManageMembers()}}});
+  document.querySelectorAll('.add-member').forEach(btn=>{btn.onclick=()=>{club.memberIds.push(btn.dataset.id);saveAll();renderManageMembers()}});
+  $('btn-invite').onclick=()=>{const name=$('new-member-name').value.trim();if(!name)return;const existing=members.find(m=>m.name.toLowerCase()===name.toLowerCase());if(existing){if(!club.memberIds.includes(existing.id))club.memberIds.push(existing.id)}else{const nm={id:generateId(),name:name};members.push(nm);club.memberIds.push(nm.id)}saveAll();renderManageMembers()};
+}
+function renderBookArchive(){
+  const club=getClub(selectedClubId);
+  const past=books.filter(b=>b.clubId===selectedClubId&&!b.active).sort((a,b)=>b.discussionDate.localeCompare(a.discussionDate));
+  let html='<div class="fade-in" style="padding:8px 0;"><button id="btn-back" class="btn btn-ghost" style="margin-bottom:16px;padding-left:0;">← Back to Club</button><h2 style="margin-bottom:16px;">Book Archive</h2>'+(past.length===0?'<div class="card" style="text-align:center;padding:40px;"><p class="text-tertiary">No past books yet.</p></div>':'')+'<div class="flex flex-col gap-3">';
+  past.forEach(b=>{const bd=statusBreakdown(b.id),avg=avgRating(b.id);html+='<div class="archive-book card card-hover" data-id="'+b.id+'"><div class="flex justify-between items-start"><div><div class="font-semibold" style="font-size:15px;">'+b.title+'</div><div class="text-sm text-secondary mt-1">by '+b.author+'</div></div><div class="flex items-center gap-1" style="font-size:14px;font-weight:700;color:var(--accent);">'+avg+' '+starSVG(true,'var(--accent)')+'</div></div><div class="flex gap-2 flex-wrap mt-3">'+Object.entries(bd).map(e=>e[1]>0?'<span class="badge '+statusBadgeClass[e[0]]+'">'+e[1]+' '+e[0]+'</span>':'').join('')+'</div></div>'});
+  html+='</div></div>';
+  app.innerHTML=html;
+  $('btn-back').onclick=()=>{view='club-home';render()};
+  document.querySelectorAll('.archive-book').forEach(el=>{el.onclick=()=>{selectedBookId=el.dataset.id;view='book-detail';render()}});
+}
+function renderBookDetail(){
+  const book=getBook(selectedBookId);
+  if(!book){view='book-archive';render();return}
+  const myStatus=getStatus(currentUser.id,book.id);
+  const myRating=getRating(currentUser.id,book.id);
+  const bd=statusBreakdown(book.id);
+  let html='<div class="fade-in" style="padding:8px 0;"><button id="btn-back" class="btn btn-ghost" style="margin-bottom:16px;padding-left:0;">← Archive</button><div class="card mb-4"><h3 style="margin-bottom:4px;">'+book.title+'</h3><p class="text-secondary text-sm mb-3">by '+book.author+'</p><p class="text-secondary text-sm" style="line-height:1.6;margin-bottom:14px;">'+book.synopsis+'</p><div class="flex gap-4 flex-wrap text-sm text-secondary mb-3"><span>📅 '+formatDate(book.discussionDate)+' '+(book.discussionTime||'')+'</span>'+(book.discussionLink?'<a href="'+book.discussionLink+'" target="_blank" style="color:var(--accent);text-decoration:none;">🔗 Link</a>':'')+'</div><div class="flex gap-2 flex-wrap mb-4">'+Object.entries(bd).map(e=>e[1]>0?'<span class="badge '+statusBadgeClass[e[0]]+'">'+e[1]+' '+e[0]+'</span>':'').join('')+'</div><div class="border-t py-3"><div class="flex justify-between items-center mb-3"><span class="text-sm font-semibold">Your Progress</span><span id="your-rating">'+renderStars(myRating?myRating.rating:0,true,book.id)+'</span></div><div class="flex gap-2 flex-wrap">'+statusOptions.map(s=>'<button class="status-btn '+(myStatus&&myStatus.status===s?'active':'')+'" data-s="'+s+'" data-book="'+book.id+'">'+s+'</button>').join('')+'</div></div><div class="border-t py-3"><span class="text-sm font-semibold" style="display:block;margin-bottom:10px;">Discussion</span><div id="comments-area">'+renderComments(book.id)+'</div><div class="flex gap-2 mt-3"><input id="comment-input" placeholder="Add a comment..." style="flex:1;"/><button id="btn-comment" class="btn btn-primary btn-sm">Post</button></div></div></div></div>';
+  app.innerHTML=html;
+  $('btn-back').onclick=()=>{view='book-archive';render()};
+  document.querySelectorAll('.status-btn').forEach(btn=>{btn.onclick=()=>{const s=statuses.find(x=>x.memberId===currentUser.id&&x.bookId===btn.dataset.book);if(s)s.status=btn.dataset.s;else statuses.push({memberId:currentUser.id,bookId:btn.dataset.book,status:btn.dataset.s});saveAll();renderBookDetail()}});
+  document.querySelectorAll('.star-btn').forEach(btn=>{btn.onclick=()=>{const val=parseInt(btn.dataset.val),bookId=btn.dataset.book;const r=ratings.find(x=>x.memberId===currentUser.id&&x.bookId===bookId);if(r)r.rating=val;else ratings.push({memberId:currentUser.id,bookId:bookId,rating:val});saveAll();renderBookDetail()}});
+  $('btn-comment').onclick=()=>{const text=$('comment-input').value.trim();if(!text)return;comments.push({id:generateId(),bookId:book.id,memberId:currentUser.id,text:text,parentId:null,createdAt:Date.now()});saveAll();$('comments-area').innerHTML=renderComments(book.id);$('comment-input').value='';attachCommentListeners(book.id)};
+  attachCommentListeners(book.id);
+}
+function renderMemberView(){
+  const myStatuses=statuses.filter(s=>s.memberId===currentUser.id);
+  const myRatings=ratings.filter(r=>r.memberId===currentUser.id);
+  const myComments=comments.filter(c=>c.memberId===currentUser.id);
+  const bookIds=[...new Set(myStatuses.map(s=>s.bookId))];
+  const myClubsCount=[...new Set(books.filter(b=>bookIds.includes(b.id)).map(b=>b.clubId))].length;
+  let html='<div class="fade-in" style="padding:8px 0;"><button id="btn-back" class="btn btn-ghost" style="margin-bottom:16px;padding-left:0;">← Dashboard</button><h2 style="margin-bottom:4px;">My Reading History</h2><p class="text-secondary text-sm" style="margin-bottom:20px;">'+bookIds.length+' book'+(bookIds.length!==1?'s':'')+' across '+myClubsCount+' club'+(myClubsCount!==1?'s':'')+'</p>'+(bookIds.length===0?'<div class="card" style="text-align:center;padding:40px;"><p class="text-tertiary">No reading history yet.</p></div>':'')+'<div class="flex flex-col gap-3">';
+  bookIds.forEach(bid=>{
+    const b=getBook(bid);const c=b?getClub(b.clubId):null;const st=myStatuses.find(s=>s.bookId===bid);const rt=myRatings.find(r=>r.bookId===bid);
+    if(!b)return;
+    html+='<div class="card"><div class="flex justify-between items-start"><div><div class="font-semibold" style="font-size:15px;">'+b.title+'</div><div class="text-sm text-secondary mt-1">'+b.author+' • '+(c?c.name:'')+'</div></div><span class="badge '+statusBadgeClass[st.status]+'">'+st.status+'</span></div>'+(rt?'<div class="mt-2">'+renderStars(rt.rating,false)+'</div>':'')+'</div>';
+  });
+  html+='</div><div class="border-t mt-4 py-4"><p class="text-sm text-secondary font-semibold" style="margin-bottom:12px;">Stats</p><div class="flex gap-4 flex-wrap"><div style="text-align:center;min-width:80px;"><div style="font-size:24px;font-weight:700;">'+myStatuses.filter(s=>s.status==='Finished').length+'</div><div class="text-xs text-tertiary">Finished</div></div><div style="text-align:center;min-width:80px;"><div style="font-size:24px;font-weight:700;">'+myStatuses.filter(s=>s.status==='Started').length+'</div><div class="text-xs text-tertiary">Reading</div></div><div style="text-align:center;min-width:80px;"><div style="font-size:24px;font-weight:700;">'+myRatings.length+'</div><div class="text-xs text-tertiary">Rated</div></div><div style="text-align:center;min-width:80px;"><div style="font-size:24px;font-weight:700;">'+myComments.length+'</div><div class="text-xs text-tertiary">Comments</div></div></div></div></div>';
+  app.innerHTML=html;
+  $('btn-back').onclick=()=>{view='dashboard';render()};
+}
+function render(){
+  window.scrollTo(0,0);
+  if(view==='landing')renderLanding();
+  else if(view==='create-user')renderCreateUser();
+  else if(view==='dashboard')renderDashboard();
+  else if(view==='club-home')renderClubHome();
+  else if(view==='create-club')renderCreateClub();
+  else if(view==='add-book')renderAddBook();
+  else if(view==='create-poll')renderCreatePoll();
+  else if(view==='create-post')renderCreatePost();
+  else if(view==='manage-members')renderManageMembers();
+  else if(view==='invite-members')renderInviteMembers();
+  else if(view==='book-archive')renderBookArchive();
+  else if(view==='book-detail')renderBookDetail();
+  else if(view==='member-view')renderMemberView();
+}
+
+// Handle invite links
+const urlParams=new URLSearchParams(window.location.search);
+const inviteCode=urlParams.get('join');
+if(inviteCode){
+  const club=clubs.find(c=>c.inviteCode===inviteCode);
+  if(club){
+    view='create-user';
+    seedData();
+    render();
+    // After user creation, auto-join them
+    const oldJoin=$('btn-join');
+    if(oldJoin){
+      const orig=oldJoin.onclick;
+      oldJoin.onclick=()=>{
+        const name=$('username').value.trim();
+        if(!name){$('username').style.borderColor='var(--danger)';setTimeout(()=>$('username').style.borderColor='var(--border)',2000);return}
+        const existing=members.find(m=>m.name.toLowerCase()===name.toLowerCase());
+        if(existing){currentUser=existing}else{currentUser={id:generateId(),name:name};members.push(currentUser);saveAll()}
+        if(!club.memberIds.includes(currentUser.id)){club.memberIds.push(currentUser.id);saveAll()}
+        selectedClubId=club.id;view='club-home';render();
+      };
+    }
+  }else{
+    seedData();render();
+  }
+}else{
+  seedData();render();
+}
+})();
+</script>
+</body>
+</html>
